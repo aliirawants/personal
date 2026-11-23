@@ -4,7 +4,7 @@
   var P = DB.setting('bulanAktif', '2026-11');
   var r = Insight.ringkas(P);
   var app = document.getElementById('app');
-  var LOGO = { livin: 'livin-mandiri.webp', gopay: 'gopay.webp' };
+  var LOGO = { livin: '../livin-mandiri.webp', gopay: '../gopay.webp' };
 
   /* ---------- total aset ---------- */
   function kartuSumber(s) {

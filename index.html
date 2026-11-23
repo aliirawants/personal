@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ali Irawan — Beranda</title>
 <meta name="description" content="Situs pribadi Ali Irawan — Personal Finance, Portfolio, dan Education Lifeskill.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -45,7 +47,7 @@ body{background:#FBFCFB}
     <span style="font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:16px;letter-spacing:-.01em">Ali Irawan</span>
   </a>
   <nav style="display:flex;flex-wrap:wrap;gap:26px;align-items:center;font-size:14px;font-weight:500">
-    <a href="finance.html" style="color:var(--muted);text-decoration:none">Personal Finance</a>
+    <a href="finance/" style="color:var(--muted);text-decoration:none">Personal Finance</a>
     <a href="portfolio.html" style="color:var(--muted);text-decoration:none">Portfolio</a>
     <a href="education.html" style="color:var(--muted);text-decoration:none">Education Lifeskill</a>
   </nav>
@@ -144,7 +146,7 @@ document.getElementById('c2').innerHTML = icon('ic-bank',26)+'<span style="font-
 document.getElementById('c3').innerHTML = icon('ic-edu',26)+'<span style="font-size:11.5px;font-weight:700">Skill radar</span>';
 
 var PINTU = [
-  { href:'finance.html',   ic:'ic-chart', nama:'Personal Finance', badge:['Siap dipakai','g'], warna:'var(--grn)', key:'fin',
+  { href:'finance/',   ic:'ic-chart', nama:'Personal Finance', badge:['Siap dipakai','g'], warna:'var(--grn)', key:'fin',
     teks:'Dashboard aset, transaksi, anggaran, dan import e-statement PDF langsung dari rekening.', cta:'Buka' },
   { href:'portfolio.html', ic:'ic-bank',  nama:'Portfolio & LinkedIn Branding', badge:['Coming soon','b'], warna:'var(--blu)', key:'por',
     teks:'Profil, pengalaman, proyek, dan mesin personal branding LinkedIn. Akan berdiri sebagai situs sendiri.', cta:'Lihat rencananya' },

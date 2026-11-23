@@ -3,7 +3,7 @@
   var LSP = 'pf.privacy.v1';
 
   var NAV = [
-    { href: 'finance.html',    key: 'dash', icon: 'ic-chart',  label: 'Dashboard' },
+    { href: 'index.html',      key: 'dash', icon: 'ic-chart',  label: 'Dashboard' },
     { href: 'transaksi.html',  key: 'trx',  icon: 'ic-swap',   label: 'Transaksi' },
     { href: 'tambah.html',     key: 'add',  icon: '',          label: 'Tambah', big: true },
     { href: 'anggaran.html',   key: 'bud',  icon: 'ic-wallet', label: 'Anggaran' },
@@ -104,7 +104,7 @@
       '<div class="topwrap">' +
         '<div class="topbar">' +
           '<div class="brand">' +
-            '<a class="back" href="index.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6"></path><path d="M12 19l-7-7 7-7"></path></svg> Beranda</a>' +
+            '<a class="back" href="../index.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6"></path><path d="M12 19l-7-7 7-7"></path></svg> Beranda</a>' +
             '<span style="display:flex;align-items:center;gap:9px">' + window.icon('ic-chart', 28) + '<span class="title">Personal Finance</span></span>' +
           '</div>' +
           '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">' +

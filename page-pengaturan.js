@@ -2,7 +2,7 @@
 (function () {
   UI.mount('set');
   var app = document.getElementById('app');
-  var LOGO = { livin: 'livin-mandiri.webp', gopay: 'gopay.webp' };
+  var LOGO = { livin: '../livin-mandiri.webp', gopay: '../gopay.webp' };
   var tabKat = 'pengeluaran';
   var baru = { nama: '', induk: '', ikon: 'ic-phone', tipe: 'pengeluaran' };
 
