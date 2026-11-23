@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ali Irawan — Beranda</title>
+<meta name="description" content="Situs pribadi Ali Irawan — Personal Finance, Portfolio, dan Education Lifeskill.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+body{background:#FBFCFB}
+@keyframes sp{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes spr{from{transform:rotate(360deg)}to{transform:rotate(0)}}
+@keyframes br{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:1}}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+@keyframes fl2{0%,100%{transform:translateY(0)}50%{transform:translateY(11px)}}
+@keyframes dash{to{stroke-dashoffset:-600}}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.ring{transform-origin:50% 50%}
+.r1{animation:sp 44s linear infinite}.r2{animation:spr 31s linear infinite}
+.r3{animation:sp 68s linear infinite}.r4{animation:spr 20s linear infinite}
+.core{transform-origin:50% 50%;animation:br 7s ease-in-out infinite}
+.bead{transform-origin:50% 50%}.b1{animation:sp 15s linear infinite}.b2{animation:spr 23s linear infinite}.b3{animation:sp 36s linear infinite}
+.wave{stroke-dasharray:10 13;animation:dash 24s linear infinite}
+.fa{animation:fl 9s ease-in-out infinite}.fb{animation:fl2 11s ease-in-out infinite}.fc{animation:fl 13s ease-in-out infinite}
+.in1{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}.in2{animation:rise .7s .1s cubic-bezier(.2,.7,.2,1) both}
+.in3{animation:rise .7s .2s cubic-bezier(.2,.7,.2,1) both}.in4{animation:rise .7s .3s cubic-bezier(.2,.7,.2,1) both}
+.glass{background:rgba(255,255,255,.82);backdrop-filter:blur(12px);border:1px solid rgba(16,35,26,.08);box-shadow:0 18px 44px -20px rgba(16,35,26,.3)}
+.door{display:block;text-decoration:none;color:inherit;transition:transform .25s cubic-bezier(.2,.7,.2,1),border-color .25s,box-shadow .25s;border:1px solid #EAEEEA;border-radius:20px;padding:26px;background:#fff;display:flex;flex-direction:column;gap:15px;min-height:246px}
+.door:hover{transform:translateY(-6px);border-color:var(--ink);box-shadow:0 22px 46px -24px rgba(16,35,26,.4)}
+.hero{position:relative;overflow:hidden}
+.lyr{transition:transform .25s ease-out}
+.topnav{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:16px 56px;background:rgba(251,252,251,.86);backdrop-filter:blur(14px);border-bottom:1px solid #EAEEEA}
+@media (max-width:760px){.topnav{padding:14px 18px}.hero{padding:32px 18px !important}h1{font-size:40px !important}}
+@media (prefers-reduced-motion:reduce){.ring,.core,.bead,.wave,.fa,.fb,.fc,.in1,.in2,.in3,.in4{animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)">
+    <span style="width:34px;height:34px;border-radius:11px;background:linear-gradient(#4ADE80,#15803D);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:14px;box-shadow:0 6px 14px -6px rgba(21,128,61,.8)">AI</span>
+    <span style="font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:16px;letter-spacing:-.01em">Ali Irawan</span>
+  </a>
+  <nav style="display:flex;flex-wrap:wrap;gap:26px;align-items:center;font-size:14px;font-weight:500">
+    <a href="finance.html" style="color:var(--muted);text-decoration:none">Personal Finance</a>
+    <a href="portfolio.html" style="color:var(--muted);text-decoration:none">Portfolio</a>
+    <a href="education.html" style="color:var(--muted);text-decoration:none">Education Lifeskill</a>
+  </nav>
+</header>
+
+<section class="hero" id="hero" style="display:flex;flex-wrap:wrap;align-items:center;gap:40px;padding:56px 56px 36px;max-width:1440px;margin:0 auto;width:100%">
+  <div aria-hidden="true" id="lyr0" class="lyr" style="position:absolute;inset:-10%;background-image:linear-gradient(#EAEEEA 1px,transparent 1px),linear-gradient(90deg,#EAEEEA 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(ellipse 72% 62% at 62% 46%,#000 25%,transparent 78%);-webkit-mask-image:radial-gradient(ellipse 72% 62% at 62% 46%,#000 25%,transparent 78%)"></div>
+  <div aria-hidden="true" id="spot" style="position:absolute;width:420px;height:420px;border-radius:50%;pointer-events:none;left:62%;top:46%;transform:translate(-50%,-50%);opacity:0;transition:opacity .4s;background:radial-gradient(circle,rgba(34,197,94,.16),rgba(34,197,94,0) 66%)"></div>
+
+  <div class="in1" style="position:relative;flex:1 1 400px;min-width:0;display:flex;flex-direction:column;gap:22px">
+    <span style="display:inline-flex;align-self:flex-start;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:var(--grn-t);color:var(--grn);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--grn-b);box-shadow:0 0 0 4px rgba(34,197,94,.22)"></span>Situs Pribadi
+    </span>
+    <h1 style="font-family:'Space Grotesk',Inter,sans-serif;font-size:62px;line-height:1.03;letter-spacing:-.035em;font-weight:700">Satu tempat<br>untuk uang, karya,<br>dan cara saya<br><span style="color:var(--grn)">belajar.</span></h1>
+    <p style="margin:0;max-width:44ch;font-size:17px;line-height:1.65;color:var(--muted)">Tiga ruang kerja pribadi yang berdiri sendiri tapi satu pintu masuk. Arahkan kursor ke salah satu kartu di bawah.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:26px;padding-top:6px" id="stat"></div>
+  </div>
+
+  <div class="in2" style="position:relative;flex:1 1 460px;min-width:0;display:flex;justify-content:center;align-items:center;min-height:470px">
+    <div id="lyr2" class="lyr" style="position:relative;width:100%;max-width:470px">
+      <svg viewBox="0 0 520 520" style="width:100%;height:auto;display:block" role="img" aria-label="Grafis abstrak tiga cincin berputar yang mewakili tiga bagian situs">
+        <circle cx="260" cy="260" r="246" fill="#fff"></circle>
+        <circle cx="260" cy="260" r="246" fill="none" stroke="#EAEEEA" stroke-width="1.5"></circle>
+        <g class="ring r3"><circle cx="260" cy="260" r="222" fill="none" stroke="#D8DEDA" stroke-width="1.5" stroke-dasharray="2 11" stroke-linecap="round"></circle></g>
+        <g class="ring r1"><circle id="rg1" cx="260" cy="260" r="190" fill="none" stroke="#22C55E" stroke-width="10" stroke-linecap="round" stroke-dasharray="300 894" style="transition:stroke-width .3s,opacity .3s"></circle></g>
+        <g class="ring r2"><circle id="rg2" cx="260" cy="260" r="152" fill="none" stroke="#F97316" stroke-width="10" stroke-linecap="round" stroke-dasharray="210 745" style="transition:stroke-width .3s,opacity .3s"></circle></g>
+        <g class="ring r4"><circle id="rg3" cx="260" cy="260" r="114" fill="none" stroke="#3B82F6" stroke-width="10" stroke-linecap="round" stroke-dasharray="148 568" style="transition:stroke-width .3s,opacity .3s"></circle></g>
+        <g class="ring r1"><circle cx="260" cy="260" r="190" fill="none" stroke="#15803D" stroke-width="1.5" stroke-dasharray="1 9" stroke-linecap="round" opacity=".45"></circle></g>
+        <path class="wave" d="M58 260 Q 108 194 158 260 T 258 260 T 358 260 T 458 260" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" opacity=".4"></path>
+        <g class="core">
+          <circle cx="260" cy="260" r="76" fill="#fff" stroke="#EAEEEA" stroke-width="1.5"></circle>
+          <circle cx="260" cy="260" r="48" fill="#10231A"></circle>
+          <circle cx="260" cy="260" r="17" fill="#22C55E"></circle>
+        </g>
+        <g class="bead b1"><circle cx="260" cy="70" r="11" fill="#15803D"></circle></g>
+        <g class="bead b2"><circle cx="260" cy="108" r="9" fill="#F97316"></circle></g>
+        <g class="bead b3"><circle cx="260" cy="146" r="7" fill="#1D4ED8"></circle></g>
+      </svg>
+
+      <div class="glass fa lyr" id="lyr3a" style="position:absolute;left:-6%;top:9%;width:186px;padding:14px 15px;border-radius:15px">
+        <span style="display:flex;align-items:center;gap:9px;margin-bottom:9px" id="c1"></span>
+        <svg viewBox="0 0 150 42" style="width:100%;height:auto" aria-hidden="true">
+          <path d="M2 36 L22 32 L42 33 L62 24 L82 26 L102 14 L122 16 L148 5" fill="none" stroke="#22C55E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M2 36 L22 32 L42 33 L62 24 L82 26 L102 14 L122 16 L148 5 L148 42 L2 42 Z" fill="#22C55E" opacity=".13"></path>
+          <circle cx="148" cy="5" r="3.4" fill="#fff" stroke="#15803D" stroke-width="2.4"></circle>
+        </svg>
+        <span style="display:block;font-size:11px;color:var(--muted);margin-top:7px">Dashboard arus kas</span>
+      </div>
+
+      <div class="glass fb lyr" id="lyr3b" style="position:absolute;right:-7%;top:34%;width:168px;padding:14px 15px;border-radius:15px">
+        <span style="display:flex;align-items:center;gap:9px;margin-bottom:10px" id="c2"></span>
+        <span style="display:flex;gap:5px;align-items:flex-end;height:40px">
+          <span style="flex:1;height:42%;background:#DBEAFE;border-radius:3px"></span>
+          <span style="flex:1;height:66%;background:#93C5FD;border-radius:3px"></span>
+          <span style="flex:1;height:52%;background:#DBEAFE;border-radius:3px"></span>
+          <span style="flex:1;height:88%;background:#3B82F6;border-radius:3px"></span>
+          <span style="flex:1;height:72%;background:#93C5FD;border-radius:3px"></span>
+          <span style="flex:1;height:100%;background:#1D4ED8;border-radius:3px"></span>
+        </span>
+        <span style="display:block;font-size:11px;color:var(--muted);margin-top:9px">Karya &amp; pengalaman</span>
+      </div>
+
+      <div class="glass fc lyr" id="lyr3c" style="position:absolute;left:2%;bottom:5%;width:176px;padding:14px 15px;border-radius:15px">
+        <span style="display:flex;align-items:center;gap:9px;margin-bottom:9px" id="c3"></span>
+        <svg viewBox="0 0 100 70" style="width:100%;height:auto" aria-hidden="true">
+          <polygon points="50,6 88,34 73,68 27,68 12,34" fill="none" stroke="#EAEEEA" stroke-width="1.4"></polygon>
+          <polygon points="50,24 70,38 62,56 38,56 30,38" fill="none" stroke="#EAEEEA" stroke-width="1.2"></polygon>
+          <polygon points="50,13 81,36 66,63 33,58 22,36" fill="#F97316" opacity=".16"></polygon>
+          <polygon points="50,13 81,36 66,63 33,58 22,36" fill="none" stroke="#EA580C" stroke-width="2.2" stroke-linejoin="round"></polygon>
+        </svg>
+        <span style="display:block;font-size:11px;color:var(--muted);margin-top:7px">5 rumpun skill</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="in3" style="padding:4px 56px 56px;max-width:1440px;margin:0 auto;width:100%">
+  <div class="grid3" id="doors"></div>
+</section>
+
+<footer class="in4" style="padding:20px 56px;border-top:1px solid #EAEEEA;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between">
+  <span>© 2026 Ali Irawan</span><span>Yogyakarta, Indonesia</span>
+</footer>
+
+<script src="icons.js"></script>
+<script>
+document.getElementById('stat').innerHTML = [
+  ['3','ruang kerja'],['1','siap dipakai'],['2026','Yogyakarta']
+].map(function(s,i){
+  return (i? '<span style="width:1px;background:#EAEEEA"></span>':'') +
+   '<span style="display:flex;flex-direction:column;gap:3px"><span style="font-family:\'Space Grotesk\',Inter,sans-serif;font-size:26px;font-weight:700;letter-spacing:-.02em">'+s[0]+'</span><span style="font-size:12px;color:var(--muted)">'+s[1]+'</span></span>';
+}).join('');
+
+document.getElementById('c1').innerHTML = icon('ic-chart',26)+'<span style="font-size:11.5px;font-weight:700">Arus kas</span>';
+document.getElementById('c2').innerHTML = icon('ic-bank',26)+'<span style="font-size:11.5px;font-weight:700">Portofolio</span>';
+document.getElementById('c3').innerHTML = icon('ic-edu',26)+'<span style="font-size:11.5px;font-weight:700">Skill radar</span>';
+
+var PINTU = [
+  { href:'finance.html',   ic:'ic-chart', nama:'Personal Finance', badge:['Siap dipakai','g'], warna:'var(--grn)', key:'fin',
+    teks:'Dashboard aset, transaksi, anggaran, dan import e-statement PDF langsung dari rekening.', cta:'Buka' },
+  { href:'portfolio.html', ic:'ic-bank',  nama:'Portfolio & LinkedIn Branding', badge:['Coming soon','b'], warna:'var(--blu)', key:'por',
+    teks:'Profil, pengalaman, proyek, dan mesin personal branding LinkedIn. Akan berdiri sebagai situs sendiri.', cta:'Lihat rencananya' },
+  { href:'education.html', ic:'ic-edu',   nama:'Education Lifeskill', badge:['Coming soon','o'], warna:'var(--org)', key:'edu',
+    teks:'Profil diri (MBTI, IQ), rak buku, skill tree, kalender belajar, dan peta dampaknya ke pekerjaan.', cta:'Lihat rencananya' }
+];
+document.getElementById('doors').innerHTML = PINTU.map(function(p){
+  return '<a class="door" href="'+p.href+'" data-k="'+p.key+'">'+
+    '<span style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+icon(p.ic,52)+
+    '<span class="pill '+p.badge[1]+'">'+p.badge[0]+'</span></span>'+
+    '<span style="font-family:\'Space Grotesk\',Inter,sans-serif;font-size:22px;font-weight:600;letter-spacing:-.015em">'+p.nama+'</span>'+
+    '<span style="font-size:14px;line-height:1.6;color:var(--muted);flex-grow:1">'+p.teks+'</span>'+
+    '<span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:'+p.warna+'">'+p.cta+
+    ' <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"></path><path d="M12 5l7 7-7 7"></path></svg></span></a>';
+}).join('');
+
+(function(){
+  var hero=document.getElementById('hero'), spot=document.getElementById('spot');
+  var L={l0:document.getElementById('lyr0'),l2:document.getElementById('lyr2'),
+         a:document.getElementById('lyr3a'),b:document.getElementById('lyr3b'),c:document.getElementById('lyr3c')};
+  function t(el,x,y){ if(el) el.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)'; }
+  hero.addEventListener('mousemove',function(e){
+    var r=hero.getBoundingClientRect();
+    var nx=(e.clientX-r.left)/r.width, ny=(e.clientY-r.top)/r.height;
+    var mx=nx*2-1, my=ny*2-1;
+    t(L.l0,mx*-12,my*-12); t(L.l2,mx*16,my*14);
+    t(L.a,mx*38,my*30); t(L.b,mx*-32,my*26); t(L.c,mx*30,my*-24);
+    spot.style.left=(nx*100)+'%'; spot.style.top=(ny*100)+'%'; spot.style.opacity=1;
+  });
+  hero.addEventListener('mouseleave',function(){
+    [L.l0,L.l2,L.a,L.b,L.c].forEach(function(el){ t(el,0,0); });
+    spot.style.opacity=0;
+  });
+  var rings={fin:'rg1',edu:'rg2',por:'rg3'};
+  document.querySelectorAll('.door').forEach(function(d){
+    d.addEventListener('mouseenter',function(){
+      var k=d.getAttribute('data-k');
+      Object.keys(rings).forEach(function(key){
+        var el=document.getElementById(rings[key]);
+        el.setAttribute('stroke-width', key===k?16:10);
+        el.style.opacity = key===k?1:.28;
+      });
+    });
+    d.addEventListener('mouseleave',function(){
+      Object.keys(rings).forEach(function(key){
+        var el=document.getElementById(rings[key]);
+        el.setAttribute('stroke-width',10); el.style.opacity=1;
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
