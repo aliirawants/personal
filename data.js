@@ -32,7 +32,7 @@
       ['k-hutang','hutang','Hutang','','ic-wallet','orange']
     ].map(function (r) { return { id:r[0], tipe:r[1], nama:r[2], induk:r[3], ikon:r[4], warna:r[5] }; }),
     SumberDana: [
-      ['s-mandiri','Bank Mandiri','bank',3992298,'ic-bank','livin',true],
+      ['s-mandiri','Bank Mandiri','bank',1442097,'ic-bank','livin',true],
       ['s-octo','Bank OCTO','bank',2145600,'ic-bank','',true],
       ['s-tunai','Tunai — Dompet Saya','tunai',2568051,'ic-cash','',true],
       ['s-gopay','GoPay','ewallet',118300,'ic-wallet','gopay',true],
@@ -178,7 +178,7 @@
     /* ---- mutasi ---- */
     uid: function (p) { return (p || 'x') + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
     hashTx: function (tgl, nominal, ket) {
-      return [String(tgl), String(Math.round(Number(nominal) || 0)), String(ket || '').slice(0, 10).toUpperCase().replace(/\s+/g, '')].join('|');
+      return [String(tgl), String(Math.round(Number(nominal) || 0)), String(ket || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 28)].join('|');
     },
     tambahTransaksi: function (t) {
       t.id = t.id || this.uid('t');
