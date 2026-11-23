@@ -19,8 +19,23 @@
     },
     rpSigned: function (n, tipe) {
       var s = Math.abs(Math.round(Number(n) || 0)).toLocaleString('id-ID');
-      return (tipe === 'pemasukan' ? '+ Rp ' : '− Rp ') + s;
+      if (tipe === 'transfer') return '⇄ Rp ' + s;
+      return ((tipe === 'pemasukan' || tipe === 'hutang') ? '+ Rp ' : '− Rp ') + s;
     },
+    warnaTipe: function (tipe) {
+      if (tipe === 'pemasukan') return 'var(--grn)';
+      if (tipe === 'transfer' || tipe === 'piutang' || tipe === 'hutang') return 'var(--blu)';
+      return 'var(--org)';
+    },
+    labelTipe: function (tipe) {
+      return { pengeluaran: 'Pengeluaran', pemasukan: 'Pemasukan', transfer: 'Pindah dana',
+               piutang: 'Piutang', hutang: 'Hutang' }[tipe] || 'Pengeluaran';
+    },
+    JENIS: [
+      ['pengeluaran', 'Pengeluaran'], ['pemasukan', 'Pemasukan'],
+      ['transfer', 'Pindah ke dompet lain'], ['piutang', 'Piutang (ditalangi, ditagih balik)'],
+      ['hutang', 'Hutang (dapat pinjaman)']
+    ],
     pct: function (n, d) { return (Number(n) || 0).toFixed(d === undefined ? 1 : d).replace('.', ',') + '%'; },
     jt: function (n) { return (Math.round((Number(n) || 0) / 1e5) / 10).toFixed(2).replace('.', ',') + ' jt'; },
     tanggal: function (iso) {

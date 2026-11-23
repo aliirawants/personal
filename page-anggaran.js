@@ -6,7 +6,7 @@
 
   function terpakai(kategoriId) {
     return DB.transaksiBulan(P).filter(function (t) {
-      if (t.tipe === 'pemasukan') return false;
+      if (!DB.isKeluar(t)) return false;
       var k = DB.kategori(t.kategoriId);
       var root = (k && k.induk) ? k.induk : t.kategoriId;
       return root === kategoriId || t.kategoriId === kategoriId;

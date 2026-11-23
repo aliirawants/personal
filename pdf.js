@@ -194,7 +194,12 @@
     cocokkan: function (baris, sumberDanaId) {
       return baris.map(function (b) {
         var hash = DB.hashTx(b.tanggal, b.nominal, b.keterangan);
-        return Object.assign({}, b, { hash: hash, duplikat: DB.adaHash(hash), sumberDanaId: sumberDanaId });
+        return Object.assign({}, b, {
+          hash: hash,
+          duplikat: DB.adaHash(hash) || DB.adaInduk(hash),
+          tujuanDanaId: '',
+          sumberDanaId: sumberDanaId
+        });
       });
     }
   };

@@ -41,7 +41,7 @@
   function render() {
     var tx = dataTerpilih();
     var masuk = 0, keluar = 0;
-    tx.forEach(function (t) { var n = Number(t.nominal) || 0; if (t.tipe === 'pemasukan') masuk += n; else keluar += n; });
+    tx.forEach(function (t) { var n = Number(t.nominal) || 0; if (DB.isMasuk(t)) masuk += n; else if (DB.isKeluar(t)) keluar += n; });
 
     var tabs = [['tahun', P.slice(0, 4)], ['lalu', 'Bulan Lalu'], ['ini', 'Bulan Ini'], ['depan', 'Masa Depan']]
       .map(function (t) {
@@ -60,7 +60,7 @@
 
     var daftar = tanggalUrut.length ? tanggalUrut.map(function (tg) {
       var rows = groups[tg];
-      var net = rows.reduce(function (a, t) { return a + (t.tipe === 'pemasukan' ? 1 : -1) * (Number(t.nominal) || 0); }, 0);
+      var net = rows.reduce(function (a, t) { return a + (DB.isNetral(t) ? 0 : (DB.isMasuk(t) ? 1 : -1) * (Number(t.nominal) || 0)); }, 0);
       return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:18px 0 9px;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);margin-top:8px">' +
         '<span style="display:flex;align-items:baseline;gap:10px"><span style="font-family:\'Space Grotesk\',Inter,sans-serif;font-size:22px;font-weight:700">' + Number(tg.slice(8)) + '</span>' +
         '<span style="font-size:12.5px;color:var(--muted)">' + UI.hari(tg) + ' · ' + UI.tanggal(tg) + '</span></span>' +
@@ -71,9 +71,11 @@
             icon(DB.ikonKategori(t.kategoriId), 36) +
             '<span style="flex-grow:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600">' + UI.esc(DB.namaKategori(t.kategoriId)) + '</span>' +
             '<span style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">' + UI.esc(t.catatan || '—') +
-            (t.asal === 'pdf' ? '<span class="pill b" style="font-size:10.5px;padding:2px 7px">Dari e-Statement</span>' : '') + '</span></span>' +
-            (s ? '<span class="pill n" style="white-space:nowrap">' + UI.esc(s.nama) + '</span>' : '') +
-            UI.v(UI.rpSigned(t.nominal, t.tipe), 'num', 'font-size:14px;font-weight:700;white-space:nowrap;min-width:118px;text-align:right;color:' + (t.tipe === 'pemasukan' ? 'var(--grn)' : 'var(--org)')) +
+            (t.asal === 'pdf' ? '<span class="pill b" style="font-size:10.5px;padding:2px 7px">Dari e-Statement</span>' : '') +
+            (t.grupId ? '<span class="pill n" style="font-size:10.5px;padding:2px 7px">Split</span>' : '') +
+            (DB.isNetral(t) ? '<span class="pill b" style="font-size:10.5px;padding:2px 7px">' + UI.labelTipe(t.tipe) + '</span>' : '') + '</span></span>' +
+            (s ? '<span class="pill n" style="white-space:nowrap">' + UI.esc(s.nama) + (t.tipe === 'transfer' && DB.sumber(t.tujuanDanaId) ? ' → ' + UI.esc(DB.sumber(t.tujuanDanaId).nama) : '') + '</span>' : '') +
+            UI.v(UI.rpSigned(t.nominal, t.tipe), 'num', 'font-size:14px;font-weight:700;white-space:nowrap;min-width:118px;text-align:right;color:' + UI.warnaTipe(t.tipe)) +
             '<button type="button" class="btn danger" data-hapus="' + t.id + '" style="padding:6px 10px;font-size:12px">Hapus</button></div>';
         }).join('');
     }).join('') : '<div class="empty">' + icon('ic-doc', 48) + '<span>Tidak ada transaksi di periode atau filter ini.</span><a class="btn solid" href="tambah.html" style="text-decoration:none">Tambah transaksi</a></div>';
@@ -97,7 +99,7 @@
         '<label class="sr" for="fk">Kategori</label><select id="fk" class="fld" style="width:auto"><option value="">Semua kategori</option>' + kats + '</select>' +
         '<label class="sr" for="fd">Sumber dana</label><select id="fd" class="fld" style="width:auto"><option value="">Semua sumber dana</option>' + srcs + '</select>' +
         '<label class="sr" for="ft">Tipe</label><select id="ft" class="fld" style="width:auto"><option value="">Semua tipe</option>' +
-          ['pengeluaran','pemasukan'].map(function (x) { return '<option value="' + x + '"' + (filter.tipe === x ? ' selected' : '') + '>' + x.charAt(0).toUpperCase() + x.slice(1) + '</option>'; }).join('') + '</select>' +
+          UI.JENIS.map(function (x) { return '<option value="' + x[0] + '"' + (filter.tipe === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>' +
         '<button type="button" class="btn" id="csv">Ekspor CSV</button>' +
       '</section>' +
 
@@ -111,9 +113,10 @@
       b.addEventListener('click', function () { filter.periode = b.getAttribute('data-per'); render(); });
     });
     document.getElementById('csv').addEventListener('click', function () {
-      var rows = [['tanggal','tipe','kategori','nominal','sumberDana','catatan','asal']].concat(dataTerpilih().map(function (t) {
+      var rows = [['tanggal','tipe','kategori','nominal','sumberDana','tujuanDana','catatan','asal']].concat(dataTerpilih().map(function (t) {
         var s = DB.sumber(t.sumberDanaId);
-        return [t.tanggal, t.tipe, DB.namaKategori(t.kategoriId), t.nominal, s ? s.nama : '', t.catatan || '', t.asal || 'manual'];
+        var tj = DB.sumber(t.tujuanDanaId);
+        return [t.tanggal, t.tipe, DB.namaKategori(t.kategoriId), t.nominal, s ? s.nama : '', tj ? tj.nama : '', t.catatan || '', t.asal || 'manual'];
       }));
       var csv = rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
       var a = document.createElement('a');

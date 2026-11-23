@@ -15,8 +15,8 @@
   var Insight = {
     ringkas: function (periode) {
       var tx = DB.transaksiBulan(periode);
-      var masuk = sum(tx.filter(function (t) { return t.tipe === 'pemasukan'; }).map(function (t) { return n(t.nominal); }));
-      var keluar = sum(tx.filter(function (t) { return t.tipe !== 'pemasukan'; }).map(function (t) { return n(t.nominal); }));
+      var masuk = sum(tx.filter(function (t) { return DB.isMasuk(t); }).map(function (t) { return n(t.nominal); }));
+      var keluar = sum(tx.filter(function (t) { return DB.isKeluar(t); }).map(function (t) { return n(t.nominal); }));
       var hariIni = new Date();
       var berjalan = (periode === hariIni.toISOString().slice(0, 7)) ? hariIni.getDate() : hariDalamBulan(periode);
       var totalHari = hariDalamBulan(periode);
@@ -34,7 +34,7 @@
     perKategori: function (periode) {
       var map = {};
       DB.transaksiBulan(periode).forEach(function (t) {
-        if (t.tipe === 'pemasukan') return;
+        if (!DB.isKeluar(t)) return;
         var k = DB.kategori(t.kategoriId);
         var root = (k && k.induk) ? k.induk : t.kategoriId;
         map[root] = (map[root] || 0) + n(t.nominal);
@@ -48,7 +48,7 @@
       for (var i = 1; i <= 3; i++) {
         var p = prevPeriode(periode, i);
         var tx = DB.transaksiBulan(p).filter(function (t) {
-          if (t.tipe === 'pemasukan') return false;
+          if (!DB.isKeluar(t)) return false;
           var k = DB.kategori(t.kategoriId);
           var root = (k && k.induk) ? k.induk : t.kategoriId;
           return kategoriId ? root === kategoriId : true;
@@ -69,7 +69,7 @@
       var pakai = r.totalAnggaran ? r.keluar / r.totalAnggaran : 0;
       var ideal = r.totalHari ? r.berjalan / r.totalHari : 0;
       pilar.push({ nama: 'Disiplin anggaran', nilai: Math.max(0, Math.min(100, (1 - Math.max(0, pakai - ideal)) * 100)), teks: r.totalAnggaran ? UI.pct(pakai * 100, 0) : '—', baik: pakai <= ideal + 0.05 });
-      var inv = sum(DB.transaksiBulan(periode).filter(function (t) { return t.kategoriId === 'k-investasi'; }).map(function (t) { return n(t.nominal); }));
+      var inv = sum(DB.transaksiBulan(periode).filter(function (t) { return DB.isKeluar(t) && t.kategoriId === 'k-investasi'; }).map(function (t) { return n(t.nominal); }));
       pilar.push({ nama: 'Investasi', nilai: inv > 0 ? 85 : 20, teks: inv > 0 ? 'Jalan' : 'Kosong', baik: inv > 0 });
       pilar.push({ nama: 'Laju belanja', nilai: Math.max(0, Math.min(100, (1 - Math.max(0, (r.proyeksi - r.totalAnggaran) / Math.max(r.totalAnggaran, 1))) * 100)), teks: r.totalAnggaran && r.proyeksi > r.totalAnggaran ? 'Terlalu cepat' : 'Aman', baik: !r.totalAnggaran || r.proyeksi <= r.totalAnggaran });
       var total = Math.round(sum(pilar.map(function (p) { return p.nilai; })) / pilar.length);
@@ -140,7 +140,7 @@
 
       DB.anggaranBulan(periode).forEach(function (a) {
         var pakai = sum(DB.transaksiBulan(periode).filter(function (t) {
-          if (t.tipe === 'pemasukan') return false;
+          if (!DB.isKeluar(t)) return false;
           var k = DB.kategori(t.kategoriId);
           var root = (k && k.induk) ? k.induk : t.kategoriId;
           return root === a.kategoriId || t.kategoriId === a.kategoriId;
@@ -161,7 +161,7 @@
 
       var keb = 0, tab = 0;
       DB.transaksiBulan(periode).forEach(function (t) {
-        if (t.tipe === 'pemasukan') return;
+        if (!DB.isKeluar(t)) return;
         var k = DB.kategori(t.kategoriId);
         var root = (k && k.induk) ? k.induk : t.kategoriId;
         if (KEBUTUHAN.indexOf(root) >= 0) keb += n(t.nominal);
@@ -177,7 +177,7 @@
       }
 
       var diluar = sum(DB.transaksiBulan(periode).filter(function (t) {
-        if (t.tipe === 'pemasukan') return false;
+        if (!DB.isKeluar(t)) return false;
         var k = DB.kategori(t.kategoriId);
         var root = (k && k.induk) ? k.induk : t.kategoriId;
         return !DB.anggaranBulan(periode).some(function (a) { return a.kategoriId === root || a.kategoriId === t.kategoriId; });
@@ -195,7 +195,7 @@
 
     kumulatif: function (periode) {
       var hari = hariDalamBulan(periode), seri = [], akum = 0;
-      var tx = DB.transaksiBulan(periode).filter(function (t) { return t.tipe !== 'pemasukan'; });
+      var tx = DB.transaksiBulan(periode).filter(function (t) { return DB.isKeluar(t); });
       for (var d = 1; d <= hari; d++) {
         var key = periode + '-' + String(d).padStart(2, '0');
         tx.forEach(function (t) { if (t.tanggal === key) akum += n(t.nominal); });
@@ -207,7 +207,7 @@
       var hari = hariDalamBulan(periode), out = new Array(hari).fill(0), ada = 0;
       for (var i = 1; i <= 3; i++) {
         var p = prevPeriode(periode, i);
-        var tx = DB.transaksiBulan(p).filter(function (t) { return t.tipe !== 'pemasukan'; });
+        var tx = DB.transaksiBulan(p).filter(function (t) { return DB.isKeluar(t); });
         if (!tx.length) continue;
         ada++;
         var akum = 0;

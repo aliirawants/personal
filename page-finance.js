@@ -126,7 +126,7 @@
   function blokPemasukan() {
     var map = {};
     DB.transaksiBulan(P).forEach(function (t) {
-      if (t.tipe !== 'pemasukan') return;
+      if (!DB.isMasuk(t)) return;
       map[t.kategoriId] = (map[t.kategoriId] || 0) + (Number(t.nominal) || 0);
     });
     var list = Object.keys(map).map(function (id) { return { id: id, jumlah: map[id] }; }).sort(function (a, b) { return b.jumlah - a.jumlah; });
@@ -212,8 +212,9 @@
         return '<div style="display:flex;align-items:center;gap:13px;padding:12px 0' + (i < tx.length - 1 ? ';border-bottom:1px solid var(--hair)' : '') + '">' +
           icon(DB.ikonKategori(t.kategoriId), 36) +
           '<span style="flex-grow:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600">' + UI.esc(DB.namaKategori(t.kategoriId)) + '</span>' +
-          '<span style="display:block;font-size:12px;color:var(--muted)">' + UI.esc(t.catatan || '—') + ' · ' + UI.tanggal(t.tanggal) + (s ? ' · ' + UI.esc(s.nama) : '') + '</span></span>' +
-          UI.v(UI.rpSigned(t.nominal, t.tipe), 'num', 'font-size:14px;font-weight:700;white-space:nowrap;color:' + (t.tipe === 'pemasukan' ? 'var(--grn)' : 'var(--org)')) + '</div>';
+          '<span style="display:block;font-size:12px;color:var(--muted)">' + UI.esc(t.catatan || '—') + ' · ' + UI.tanggal(t.tanggal) + (s ? ' · ' + UI.esc(s.nama) : '') +
+          (DB.isNetral(t) ? ' · ' + UI.labelTipe(t.tipe) : '') + '</span></span>' +
+          UI.v(UI.rpSigned(t.nominal, t.tipe), 'num', 'font-size:14px;font-weight:700;white-space:nowrap;color:' + UI.warnaTipe(t.tipe)) + '</div>';
       }).join('') + '</div></section>';
   }
 

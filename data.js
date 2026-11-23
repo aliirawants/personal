@@ -151,12 +151,26 @@
     sumberTersembunyi: function () {
       return this.state.SumberDana.filter(function (s) { return !(s.tampilDiTotal === true || s.tampilDiTotal === 'TRUE'); });
     },
+    /* jenis transaksi: pengeluaran | pemasukan | transfer | piutang | hutang
+       - transfer : pindah antar dompet sendiri, bukan pengeluaran maupun pemasukan
+       - piutang  : uang keluar tapi ditagih balik, bukan pengeluaran
+       - hutang   : uang masuk tapi harus dikembalikan, bukan pemasukan          */
+    isKeluar: function (t) { return (t.tipe || 'pengeluaran') === 'pengeluaran'; },
+    isMasuk:  function (t) { return t.tipe === 'pemasukan'; },
+    isNetral: function (t) { return t.tipe === 'transfer' || t.tipe === 'piutang' || t.tipe === 'hutang'; },
+
     saldo: function (sumberId) {
-      var awal = Number(this.sumber(sumberId) ? this.sumber(sumberId).saldoAwal : 0) || 0;
+      var s = this.sumber(sumberId);
+      var awal = Number(s ? s.saldoAwal : 0) || 0;
       this.state.Transaksi.forEach(function (t) {
-        if (t.sumberDanaId !== sumberId) return;
         var n = Number(t.nominal) || 0;
-        awal += (t.tipe === 'pemasukan' ? n : -n);
+        if (t.tipe === 'transfer') {
+          if (t.sumberDanaId === sumberId) awal -= n;
+          if (t.tujuanDanaId === sumberId) awal += n;
+          return;
+        }
+        if (t.sumberDanaId !== sumberId) return;
+        awal += (t.tipe === 'pemasukan' || t.tipe === 'hutang') ? n : -n;
       });
       return awal;
     },
@@ -177,11 +191,21 @@
 
     /* ---- mutasi ---- */
     uid: function (p) { return (p || 'x') + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
-    hashTx: function (tgl, nominal, ket) {
-      return [String(tgl), String(Math.round(Number(nominal) || 0)), String(ket || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 28)].join('|');
+    hashTx: function (tgl, nominal, ket, bagian) {
+      var h = [String(tgl), String(Math.round(Number(nominal) || 0)), String(ket || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 28)].join('|');
+      return bagian ? h + '#' + bagian : h;
+    },
+    /* hash induk: dipakai supaya satu baris PDF yang sudah dipecah tidak terbaca ulang */
+    hashInduk: function (tgl, nominal, ket) { return this.hashTx(tgl, nominal, ket); },
+    adaInduk: function (h) {
+      return this.state.Transaksi.some(function (t) { return t.hashInduk === h; });
     },
     tambahTransaksi: function (t) {
       t.id = t.id || this.uid('t');
+      t.tipe = t.tipe || 'pengeluaran';
+      t.tujuanDanaId = t.tujuanDanaId || '';
+      t.grupId = t.grupId || '';
+      t.hashInduk = t.hashInduk || '';
       t.hash = t.hash || this.hashTx(t.tanggal, t.nominal, t.catatan);
       t.dibuat = new Date().toISOString();
       this.state.Transaksi.push(t);
