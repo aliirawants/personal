@@ -130,10 +130,14 @@
         '<td class="num" style="white-space:nowrap">' + UI.esc(b.tanggal) + '</td>' +
         '<td' + (b.duplikat ? ' style="text-decoration:line-through"' : '') + '>' + UI.esc(b.keterangan) + '</td>' +
         '<td style="text-align:right;white-space:nowrap">' + UI.v(UI.rpSigned(b.nominal, b.tipe), 'num', 'font-weight:600;color:' + (b.tipe === 'pemasukan' ? 'var(--grn)' : 'var(--org)')) + '</td>' +
-        '<td>' + (b.duplikat ? UI.esc(DB.namaKategori(b.kategoriId) || '—') :
+        '<td><span style="display:flex;align-items:center;gap:8px">' +
+          (b.kategoriId ? icon(DB.ikonKategori(b.kategoriId), 26)
+                        : '<span style="width:26px;height:26px;border-radius:8px;border:1px dashed var(--org-b);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--org);font-size:13px;font-weight:700">?</span>') +
+          (b.duplikat ? '<span>' + UI.esc(DB.namaKategori(b.kategoriId) || '—') + '</span>' :
           '<select class="fld" data-kat="' + i + '" aria-label="Kategori baris ' + (i + 1) + '" style="padding:5px 7px;font-size:11.5px' + (!b.kategoriId ? ';border-color:var(--org-b);color:var(--org);font-weight:600' : '') + '">' +
           '<option value="">Pilih kategori…</option>' +
-          kats.map(function (k) { return '<option value="' + k.id + '"' + (b.kategoriId === k.id ? ' selected' : '') + '>' + UI.esc(DB.namaKategori(k.id)) + '</option>'; }).join('') + '</select>') + '</td>' +
+          kats.map(function (k) { return '<option value="' + k.id + '"' + (b.kategoriId === k.id ? ' selected' : '') + '>' + UI.esc(DB.namaKategori(k.id)) + '</option>'; }).join('') + '</select>') +
+          '</span></td>' +
         '<td>' + (b.duplikat ? '<span class="pill n">Sudah ada</span>' : (b.kategoriId ? '<span class="pill g">Baru</span>' : '<span class="pill o">Belum dikenali</span>')) + '</td></tr>';
     }).join('');
 
