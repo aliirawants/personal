@@ -164,12 +164,12 @@
     if (x.tipe === 'transfer') {
       return '<span style="display:flex;align-items:center;gap:8px">' +
         (x.tujuanDanaId ? icon((DB.sumber(x.tujuanDanaId) || {}).ikon || 'ic-wallet', 26) : tandaTanya()) +
-        '<select class="fld" data-tujuan="' + key + '" aria-label="Dompet tujuan" style="padding:5px 7px;font-size:11.5px' + (x.tujuanDanaId ? '' : ';border-color:var(--org-b);color:var(--org);font-weight:600') + '">' +
+        '<select class="fld" data-tujuan="' + key + '" aria-label="Dompet tujuan" style="padding:5px 7px;font-size:11.5px;min-width:186px' + (x.tujuanDanaId ? '' : ';border-color:var(--org-b);color:var(--org);font-weight:600') + '">' +
         '<option value="">Pilih dompet tujuan…</option>' + opsiDompet(sumber, x.tujuanDanaId) + '</select></span>';
     }
     return '<span style="display:flex;align-items:center;gap:8px">' +
       (x.kategoriId ? icon(DB.ikonKategori(x.kategoriId), 26) : tandaTanya()) +
-      '<select class="fld" data-kat="' + key + '" aria-label="Kategori" style="padding:5px 7px;font-size:11.5px' + (x.kategoriId ? '' : ';border-color:var(--org-b);color:var(--org);font-weight:600') + '">' +
+      '<select class="fld" data-kat="' + key + '" aria-label="Kategori" style="padding:5px 7px;font-size:11.5px;min-width:186px' + (x.kategoriId ? '' : ';border-color:var(--org-b);color:var(--org);font-weight:600') + '">' +
       '<option value="">Pilih kategori…</option>' + opsiKategori(x.tipe, x.kategoriId) + '</select></span>';
   }
   function tandaTanya() {
@@ -201,7 +201,7 @@
         '<td style="text-align:right;white-space:nowrap">' + UI.v(UI.rpSigned(b.nominal, b.tipe), 'num', 'font-weight:600;color:' + UI.warnaTipe(b.tipe)) + '</td>' +
         '<td>' + (b.duplikat || pecah
           ? '<span style="font-size:11.5px;color:var(--muted)">' + (pecah ? 'Dipecah ' + b.bagian.length + ' bagian' : UI.labelTipe(b.tipe)) + '</span>'
-          : '<select class="fld" data-jenis="' + i + '" aria-label="Jenis transaksi baris ' + (i + 1) + '" style="padding:5px 7px;font-size:11.5px">' + opsiJenis(b.tipe) + '</select>') + '</td>' +
+          : '<select class="fld" data-jenis="' + i + '" aria-label="Jenis transaksi baris ' + (i + 1) + '" style="padding:5px 7px;font-size:11.5px;min-width:136px">' + opsiJenis(b.tipe) + '</select>') + '</td>' +
         '<td>' + (b.duplikat
           ? '<span>' + UI.esc(DB.namaKategori(b.kategoriId) || '—') + '</span>'
           : (pecah ? '<span style="font-size:11.5px;color:var(--muted)">lihat bagian di bawah</span>' : selTujuan(String(i), b, b.sumberDanaId))) + '</td>' +
@@ -221,7 +221,7 @@
             '<span style="color:#C9D1CB">└</span>' +
             '<input type="text" data-label="' + key + '" value="' + UI.esc(g.label || '') + '" placeholder="Bagian siapa? (opsional)" aria-label="Label bagian ' + (j + 1) + '" style="font:inherit;font-size:12px;border:1px solid var(--line);border-radius:7px;padding:4px 8px;width:180px"></span></td>' +
           '<td style="text-align:right;white-space:nowrap"><input type="text" inputmode="numeric" data-nom="' + key + '" value="' + (Number(g.nominal) || 0).toLocaleString('id-ID') + '" aria-label="Nominal bagian ' + (j + 1) + '" style="font:inherit;font-size:12px;font-weight:600;text-align:right;border:1px solid var(--line);border-radius:7px;padding:4px 8px;width:110px"></td>' +
-          '<td><select class="fld" data-jenis="' + key + '" aria-label="Jenis bagian ' + (j + 1) + '" style="padding:5px 7px;font-size:11.5px">' + opsiJenis(g.tipe) + '</select></td>' +
+          '<td><select class="fld" data-jenis="' + key + '" aria-label="Jenis bagian ' + (j + 1) + '" style="padding:5px 7px;font-size:11.5px;min-width:136px">' + opsiJenis(g.tipe) + '</select></td>' +
           '<td>' + selTujuan(key, g, b.sumberDanaId) + '</td>' +
           '<td style="white-space:nowrap">' + (b.bagian.length > 2
             ? '<button type="button" class="btn danger" data-hapusbagian="' + key + '" style="padding:4px 9px;font-size:11px">Hapus</button>' : '') + '</td></tr>';
@@ -277,7 +277,7 @@
                 var q = s.split('|');
                 return '<span style="border:1px solid var(--line);border-radius:11px;padding:12px 14px;display:flex;flex-direction:column;gap:3px"><span class="num" style="font-size:20px;font-weight:700;color:' + q[2] + '">' + q[0] + '</span><span style="font-size:11px;color:var(--muted)">' + q[1] + '</span></span>';
               }).join('') + '</div>' +
-            '<div class="scroll"><table style="min-width:900px"><thead><tr>' +
+            '<div class="scroll"><table style="min-width:1120px"><thead><tr>' +
               '<th style="width:34px"><span class="sr">Pilih</span></th><th>Tanggal</th><th>Keterangan di PDF</th><th style="text-align:right">Nominal</th><th>Jenis</th><th>Kategori / Tujuan</th><th>Status</th>' +
               '</tr></thead><tbody>' + tabelRows + '</tbody></table></div>' +
             '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between">' +
