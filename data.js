@@ -157,7 +157,41 @@
        - hutang   : uang masuk tapi harus dikembalikan, bukan pemasukan          */
     isKeluar: function (t) { return (t.tipe || 'pengeluaran') === 'pengeluaran'; },
     isMasuk:  function (t) { return t.tipe === 'pemasukan'; },
-    isNetral: function (t) { return t.tipe === 'transfer' || t.tipe === 'piutang' || t.tipe === 'hutang'; },
+    isNetral: function (t) { return ['transfer', 'piutang', 'hutang', 'pelunasan', 'pembayaran'].indexOf(t.tipe) >= 0; },
+    /* pelunasan  : piutangku dikembalikan — uang masuk, bukan pemasukan
+       pembayaran : aku melunasi hutang   — uang keluar, bukan pengeluaran */
+
+    /* daftar pelunasan disimpan ringkas: "id:nominal|id:nominal" */
+    uraiLunasi: function (v) {
+      if (Array.isArray(v)) return v;
+      return String(v || '').split('|').filter(Boolean).map(function (s) {
+        var q = s.split(':');
+        return { id: q[0], nominal: Number(q[1]) || 0 };
+      });
+    },
+    rangkumLunasi: function (arr) {
+      return (arr || []).filter(function (l) { return l.id && l.nominal; })
+        .map(function (l) { return l.id + ':' + Math.round(l.nominal); }).join('|');
+    },
+    /* berapa sisa sebuah piutang/hutang yang belum ditutup */
+    sisaTagihan: function (t) {
+      var self = this, tutup = 0;
+      this.state.Transaksi.forEach(function (x) {
+        self.uraiLunasi(x.lunasi).forEach(function (l) { if (l.id === t.id) tutup += l.nominal; });
+      });
+      return Math.max(0, (Number(t.nominal) || 0) - tutup);
+    },
+    tagihanTerbuka: function (jenis) {
+      var self = this;
+      return this.state.Transaksi.filter(function (t) { return t.tipe === jenis; })
+        .map(function (t) { return { tx: t, sisa: self.sisaTagihan(t) }; })
+        .filter(function (r) { return r.sisa > 0; })
+        .sort(function (a, b) { return String(a.tx.tanggal).localeCompare(String(b.tx.tanggal)); });
+    },
+    piutangTerbuka: function () { return this.tagihanTerbuka('piutang'); },
+    hutangTerbuka:  function () { return this.tagihanTerbuka('hutang'); },
+    totalPiutang: function () { return this.piutangTerbuka().reduce(function (a, r) { return a + r.sisa; }, 0); },
+    totalHutang:  function () { return this.hutangTerbuka().reduce(function (a, r) { return a + r.sisa; }, 0); },
 
     saldo: function (sumberId) {
       var s = this.sumber(sumberId);
@@ -170,7 +204,8 @@
           return;
         }
         if (t.sumberDanaId !== sumberId) return;
-        awal += (t.tipe === 'pemasukan' || t.tipe === 'hutang') ? n : -n;
+        var masuk = ['pemasukan', 'hutang', 'pelunasan'].indexOf(t.tipe) >= 0;
+        awal += masuk ? n : -n;
       });
       return awal;
     },
@@ -206,6 +241,8 @@
       t.tujuanDanaId = t.tujuanDanaId || '';
       t.grupId = t.grupId || '';
       t.hashInduk = t.hashInduk || '';
+      if (t.lunasi && typeof t.lunasi !== 'string') t.lunasi = this.rangkumLunasi(t.lunasi);
+      t.lunasi = t.lunasi || '';
       t.hash = t.hash || this.hashTx(t.tanggal, t.nominal, t.catatan);
       t.dibuat = new Date().toISOString();
       this.state.Transaksi.push(t);

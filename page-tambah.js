@@ -3,7 +3,7 @@
   UI.mount('add');
   var app = document.getElementById('app');
   var tab = 'manual';
-  var form = { tipe: 'pengeluaran', nominal: 0, kategoriId: 'k-makan', sumberDanaId: 's-tunai', tujuanDanaId: '', catatan: '', tanggal: new Date().toISOString().slice(0, 10) };
+  var form = { tipe: 'pengeluaran', nominal: 0, kategoriId: 'k-makan', sumberDanaId: 's-tunai', tujuanDanaId: '', lunasi: [], mode: 'rata', sisaKategoriId: '', catatan: '', tanggal: new Date().toISOString().slice(0, 10) };
   var impor = { file: null, sumberDanaId: 's-mandiri', baris: [], info: null, perluPassword: false, pesan: '', memuat: false };
 
   function render() {
@@ -37,7 +37,8 @@
       '<div style="flex:1 1 540px;max-width:560px;min-width:0;display:flex;flex-direction:column;gap:18px">' +
         '<span style="display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--hair);border-radius:11px">' +
         ['pengeluaran|Pengeluaran|var(--org)', 'pemasukan|Pemasukan|var(--grn)', 'transfer|Pindah dana|var(--blu)',
-         'piutang|Piutang|var(--blu)', 'hutang|Hutang|var(--blu)'].map(function (t) {
+         'piutang|Piutang|var(--blu)', 'hutang|Hutang|var(--blu)',
+         'pelunasan|Pelunasan patungan|var(--blu)', 'pembayaran|Bayar hutang|var(--blu)'].map(function (t) {
           var p = t.split('|'), on = form.tipe === p[0];
           return '<button type="button" data-tipe="' + p[0] + '" style="flex:1 1 90px;border:none;background:' + (on ? '#fff' : 'none') + ';padding:11px 4px;border-radius:8px;font:inherit;font-size:12.5px;font-weight:' + (on ? 700 : 600) + ';color:' + (on ? p[2] : 'var(--muted)') + ';cursor:pointer' + (on ? ';box-shadow:0 1px 3px rgba(16,35,26,.12)' : '') + '">' + p[1] + '</button>';
         }).join('') + '</span>' +
@@ -69,7 +70,38 @@
     /* baris kategori disisipkan terpisah supaya select-nya rapi */
     var kats = DB.state.Kategori.filter(function (k) { return form.tipe === 'pemasukan' ? k.tipe === 'pemasukan' : k.tipe === 'pengeluaran'; });
     var slot = document.getElementById('rowKategori');
-    if (slot && form.tipe === 'transfer') {
+    if (slot && isLunas(form)) {
+      var daftar = daftarLunas(form);
+      var pilih = {};
+      (form.lunasi || []).forEach(function (l) { pilih[l.id] = l.nominal; });
+      var sisa = sisaLunas(form, form.nominal);
+      var rata = form.mode !== 'manual';
+      var katSisa = DB.state.Kategori.filter(function (k) { return k.tipe === (form.tipe === 'pelunasan' ? 'pemasukan' : 'pengeluaran'); });
+      slot.style.flexDirection = 'column';
+      slot.style.alignItems = 'stretch';
+      slot.innerHTML = daftar.length
+        ? '<span class="lbl" style="margin-bottom:4px">' + (form.tipe === 'pelunasan' ? 'Piutang' : 'Hutang') + ' yang ditutup</span>' +
+          daftar.map(function (r) {
+            var on = pilih[r.tx.id] !== undefined;
+            return '<label style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--hair);font-size:13px;cursor:pointer">' +
+              '<input type="checkbox" data-mlpilih="' + r.tx.id + '"' + (on ? ' checked' : '') + ' style="width:15px;height:15px;accent-color:#15803D">' +
+              '<span style="flex-grow:1;min-width:0"><strong>' + UI.esc(r.tx.catatan || DB.namaKategori(r.tx.kategoriId)) + '</strong>' +
+              '<span style="display:block;font-size:11.5px;color:var(--muted)">' + UI.tanggal(r.tx.tanggal) + ' · sisa ' + UI.rp(r.sisa) + '</span></span>' +
+              (on ? '<input type="text" inputmode="numeric" data-mlnom="' + r.tx.id + '"' + (rata ? ' disabled' : '') + ' value="' + (pilih[r.tx.id] || 0).toLocaleString("id-ID") + '" aria-label="Nominal pelunasan" style="font:inherit;font-size:12.5px;font-weight:600;text-align:right;border:1px solid var(--line);border-radius:7px;padding:5px 8px;width:116px' + (rata ? ";background:var(--bg);color:var(--muted)" : "") + '">' : '') +
+              '</label>';
+          }).join('') +
+          '<span style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding-top:10px">' +
+            '<span style="display:inline-flex;padding:3px;background:var(--hair);border-radius:9px">' +
+              '<button type="button" data-mlmode="rata" style="border:none;background:' + (rata ? "#fff" : "none") + ';padding:6px 12px;border-radius:7px;font:inherit;font-size:11.5px;font-weight:' + (rata ? 700 : 600) + ';color:' + (rata ? "var(--ink)" : "var(--muted)") + ';cursor:pointer">Bagi rata</button>' +
+              '<button type="button" data-mlmode="manual" style="border:none;background:' + (rata ? "none" : "#fff") + ';padding:6px 12px;border-radius:7px;font:inherit;font-size:11.5px;font-weight:' + (rata ? 600 : 700) + ';color:' + (rata ? "var(--muted)" : "var(--ink)") + ';cursor:pointer">Isi sendiri</button>' +
+            '</span>' +
+            '<span style="font-size:12px;font-weight:700;color:' + (sisa === 0 ? "var(--grn)" : "var(--org)") + '">' + (sisa === 0 ? 'Pas' : (sisa > 0 ? 'Sisa ' + UI.rp(sisa) : 'Lebih ' + UI.rp(-sisa))) + '</span></span>' +
+          (sisa > 0 ? '<span style="display:flex;align-items:center;gap:8px;padding-top:8px;font-size:12px"><span style="color:var(--muted)">Sisanya catat sebagai</span>' +
+            '<select class="fld" id="mlSisa" aria-label="Kategori untuk sisa" style="padding:6px 8px;font-size:12px;width:auto"><option value="">Pilih kategori…</option>' +
+            katSisa.map(function (k) { return '<option value="' + k.id + '"' + (form.sisaKategoriId === k.id ? ' selected' : '') + '>' + UI.esc(DB.namaKategori(k.id)) + '</option>'; }).join('') + '</select></span>' : '')
+        : '<span style="font-size:12.5px;color:var(--muted);line-height:1.6">Belum ada ' + (form.tipe === 'pelunasan' ? 'piutang' : 'hutang') + ' yang terbuka. Catat dulu transaksinya lewat jenis ' + (form.tipe === 'pelunasan' ? '<strong>Piutang</strong>' : '<strong>Hutang</strong>') + '.</span>';
+    } else if (slot && form.tipe === 'transfer') {
+      slot.style.flexDirection = ''; slot.style.alignItems = '';
       var tj = DB.sumber(form.tujuanDanaId);
       slot.innerHTML = icon(tj ? tj.ikon : 'ic-wallet', 30) +
         '<label class="sr" for="fTujuan">Dompet tujuan</label><select id="fTujuan" class="fld" style="border:none;padding:0;font-size:15px;font-weight:600;background:none;cursor:pointer">' +
@@ -77,6 +109,7 @@
         DB.state.SumberDana.filter(function (s) { return s.id !== form.sumberDanaId; })
           .map(function (s) { return '<option value="' + s.id + '"' + (form.tujuanDanaId === s.id ? ' selected' : '') + '>' + UI.esc(s.nama) + '</option>'; }).join('') + '</select>';
     } else if (slot) {
+      slot.style.flexDirection = ''; slot.style.alignItems = '';
       slot.innerHTML = icon(DB.ikonKategori(form.kategoriId), 30) +
         '<label class="sr" for="fKategori">Kategori</label><select id="fKategori" class="fld" style="border:none;padding:0;font-size:15px;font-weight:600;background:none;cursor:pointer">' +
         kats.map(function (k) { return '<option value="' + k.id + '"' + (form.kategoriId === k.id ? ' selected' : '') + '>' + UI.esc(DB.namaKategori(k.id)) + '</option>'; }).join('') + '</select>';
@@ -104,19 +137,63 @@
         if (id === 'fTanggal') form.tanggal = el.value;
       });
     });
+    app.querySelectorAll('[data-mlpilih]').forEach(function (c) {
+      c.addEventListener('change', function () {
+        var id = c.getAttribute('data-mlpilih');
+        form.lunasi = form.lunasi || [];
+        if (c.checked) { if (!form.lunasi.some(function (l) { return l.id === id; })) form.lunasi.push({ id: id, nominal: 0 }); }
+        else form.lunasi = form.lunasi.filter(function (l) { return l.id !== id; });
+        if (form.mode !== 'manual') bagiRata(form, form.nominal);
+        render();
+      });
+    });
+    app.querySelectorAll('[data-mlnom]').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        var id = inp.getAttribute('data-mlnom');
+        var l = (form.lunasi || []).filter(function (x) { return x.id === id; })[0];
+        if (!l) return;
+        var maks = 0;
+        daftarLunas(form).forEach(function (r) { if (r.tx.id === id) maks = r.sisa; });
+        l.nominal = Math.min(maks, Number(String(inp.value).replace(/\D/g, '')) || 0);
+        render();
+      });
+    });
+    app.querySelectorAll('[data-mlmode]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        form.mode = btn.getAttribute('data-mlmode');
+        if (form.mode === 'rata') bagiRata(form, form.nominal);
+        render();
+      });
+    });
+    var mlSisa = document.getElementById('mlSisa');
+    if (mlSisa) mlSisa.addEventListener('change', function () { form.sisaKategoriId = this.value; render(); });
+
     var simpan = document.getElementById('fSimpan');
     if (simpan) simpan.addEventListener('click', function () {
       if (!form.nominal) { UI.toast('Nominal belum diisi'); return; }
       if (form.tipe === 'transfer' && !form.tujuanDanaId) { UI.toast('Dompet tujuan belum dipilih'); return; }
+      var m = masalahSatu(form, form.nominal);
+      if (m) { UI.toast(m.charAt(0).toUpperCase() + m.slice(1)); return; }
+      var lunas = isLunas(form) ? (form.lunasi || []).filter(function (l) { return l.nominal; }) : [];
+      var pakai = lunas.reduce(function (a, l) { return a + l.nominal; }, 0);
       DB.tambahTransaksi({
         tanggal: form.tanggal, tipe: form.tipe,
-        kategoriId: form.tipe === 'transfer' ? '' : form.kategoriId,
+        kategoriId: (form.tipe === 'transfer' || isLunas(form)) ? '' : form.kategoriId,
         tujuanDanaId: form.tipe === 'transfer' ? form.tujuanDanaId : '',
-        nominal: form.nominal,
+        nominal: isLunas(form) ? pakai : form.nominal,
+        lunasi: lunas,
         sumberDanaId: form.sumberDanaId, catatan: form.catatan, asal: 'manual'
       });
+      var sisaU = isLunas(form) ? form.nominal - pakai : 0;
+      if (sisaU > 0 && form.sisaKategoriId) {
+        DB.tambahTransaksi({
+          tanggal: form.tanggal, tipe: form.tipe === 'pelunasan' ? 'pemasukan' : 'pengeluaran',
+          kategoriId: form.sisaKategoriId, nominal: sisaU,
+          sumberDanaId: form.sumberDanaId, catatan: (form.catatan || 'Pelunasan') + ' · sisa di luar pelunasan', asal: 'manual'
+        });
+      }
       UI.toast('Tersimpan');
-      form.nominal = 0; form.catatan = '';
+      form.nominal = 0; form.catatan = ''; form.lunasi = []; form.sisaKategoriId = '';
       render();
     });
   }
@@ -139,6 +216,33 @@
   function opsiJenis(terpilih) {
     return UI.JENIS.map(function (j) { return '<option value="' + j[0] + '"' + (terpilih === j[0] ? ' selected' : '') + '>' + j[1] + '</option>'; }).join('');
   }
+  function isLunas(x) { return x.tipe === 'pelunasan' || x.tipe === 'pembayaran'; }
+  function daftarLunas(x) { return x.tipe === 'pelunasan' ? DB.piutangTerbuka() : DB.hutangTerbuka(); }
+  function totalLunas(x) { return (x.lunasi || []).reduce(function (a, l) { return a + (Number(l.nominal) || 0); }, 0); }
+  function sisaLunas(x, nominal) { return (Number(nominal) || 0) - totalLunas(x); }
+  function bagiRata(x, nominal) {
+    var item = x.lunasi || [];
+    if (!item.length) return;
+    var ruang = {};
+    daftarLunas(x).forEach(function (r) { ruang[r.tx.id] = r.sisa; });
+    item.forEach(function (l) { l.nominal = 0; });
+    var uang = Number(nominal) || 0, putaran = 0;
+    while (uang > 0 && putaran < 30) {
+      var muat = item.filter(function (l) { return (l.nominal || 0) < (ruang[l.id] || 0); });
+      if (!muat.length) break;
+      var jatah = Math.floor(uang / muat.length);
+      if (jatah < 1) {
+        var l0 = muat[0], beri0 = Math.min(uang, (ruang[l0.id] || 0) - l0.nominal);
+        l0.nominal += beri0; uang -= beri0;
+        break;
+      }
+      muat.forEach(function (l) {
+        var beri = Math.min(jatah, (ruang[l.id] || 0) - l.nominal);
+        l.nominal += beri; uang -= beri;
+      });
+      putaran++;
+    }
+  }
   function totalBagian(b) {
     return (b.bagian || []).reduce(function (a, x) { return a + (Number(x.nominal) || 0); }, 0);
   }
@@ -147,20 +251,34 @@
     if (b.bagian) {
       if (totalBagian(b) !== b.nominal) return 'Jumlah bagian belum pas';
       for (var i = 0; i < b.bagian.length; i++) {
-        var m = masalahSatu(b.bagian[i], b.sumberDanaId);
+        var m = masalahSatu(b.bagian[i], b.bagian[i].nominal);
         if (m) return 'Bagian ' + (i + 1) + ': ' + m;
       }
       return '';
     }
-    return masalahSatu(b, b.sumberDanaId);
+    return masalahSatu(b, b.nominal);
   }
-  function masalahSatu(x, sumber) {
+  function masalahSatu(x, nominal) {
     if (x.tipe === 'transfer') return x.tujuanDanaId ? '' : 'tujuan dompet belum dipilih';
+    if (isLunas(x)) {
+      if (!(x.lunasi || []).length) return 'pilih tagihan yang dilunasi';
+      var sisa = sisaLunas(x, nominal);
+      if (sisa < 0) return 'alokasi melebihi nominal';
+      if (sisa > 0 && !x.sisaKategoriId) return 'kategori untuk sisa belum dipilih';
+      return '';
+    }
     return x.kategoriId ? '' : 'kategori belum dipilih';
   }
 
   /* satu sel "ke mana": kategori, atau dompet tujuan kalau jenisnya pindah dana */
-  function selTujuan(key, x, sumber) {
+  function selTujuan(key, x, sumber, nominal) {
+    if (isLunas(x)) {
+      var n = (x.lunasi || []).length;
+      var sisa = sisaLunas(x, nominal);
+      return '<span style="display:flex;flex-direction:column;gap:3px;font-size:11.5px">' +
+        '<span style="font-weight:700;color:' + (n ? 'var(--blu)' : 'var(--org)') + '">' + (n ? n + ' tagihan dipilih' : 'Belum pilih tagihan') + '</span>' +
+        '<span style="color:var(--muted)">Teralokasi ' + UI.rp(totalLunas(x)) + (sisa > 0 ? ' · sisa ' + UI.rp(sisa) : '') + '</span></span>';
+    }
     if (x.tipe === 'transfer') {
       return '<span style="display:flex;align-items:center;gap:8px">' +
         (x.tujuanDanaId ? icon((DB.sumber(x.tujuanDanaId) || {}).ikon || 'ic-wallet', 26) : tandaTanya()) +
@@ -174,6 +292,60 @@
   }
   function tandaTanya() {
     return '<span style="width:26px;height:26px;border-radius:8px;border:1px dashed var(--org-b);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--org);font-size:13px;font-weight:700">?</span>';
+  }
+
+  function barisLunas(b, i) {
+    var daftar = daftarLunas(b);
+    var dipilih = {};
+    (b.lunasi || []).forEach(function (l) { dipilih[l.id] = l.nominal; });
+    var sisa = sisaLunas(b, b.nominal);
+    var rata = b.mode !== 'manual';
+    var katSisa = DB.state.Kategori.filter(function (k) {
+      return k.tipe === (b.tipe === 'pelunasan' ? 'pemasukan' : 'pengeluaran');
+    });
+
+    if (!daftar.length) {
+      return '<tr style="background:#FBFCFB"><td></td><td></td><td colspan="5" style="padding-left:26px;font-size:12px;color:var(--muted)">' +
+        'Belum ada ' + (b.tipe === 'pelunasan' ? 'piutang' : 'hutang') + ' yang terbuka. Catat dulu transaksi ' +
+        (b.tipe === 'pelunasan' ? 'Piutang' : 'Hutang') + '-nya, lalu baris ini bisa ditautkan.' +
+        '</td></tr>';
+    }
+
+    var baris = daftar.map(function (r) {
+      var on = dipilih[r.tx.id] !== undefined;
+      var key = i + '~' + r.tx.id;
+      return '<tr style="background:#FBFCFB">' +
+        '<td></td><td></td>' +
+        '<td style="padding-left:26px"><label style="display:flex;align-items:center;gap:9px;font-size:12px;cursor:pointer">' +
+          '<span style="color:#C9D1CB">└</span>' +
+          '<input type="checkbox" data-lunaspilih="' + key + '"' + (on ? ' checked' : '') + ' style="width:15px;height:15px;accent-color:#15803D">' +
+          '<span><strong>' + UI.esc(r.tx.catatan || DB.namaKategori(r.tx.kategoriId)) + '</strong>' +
+          '<span style="display:block;color:var(--muted)">' + UI.tanggal(r.tx.tanggal) + ' · sisa ' + UI.rp(r.sisa) + '</span></span></label></td>' +
+        '<td style="text-align:right;white-space:nowrap">' +
+          (on ? '<input type="text" inputmode="numeric" data-lunasnom="' + key + '"' + (rata ? ' disabled' : '') +
+                ' value="' + (dipilih[r.tx.id] || 0).toLocaleString("id-ID") + '" aria-label="Nominal pelunasan" ' +
+                'style="font:inherit;font-size:12px;font-weight:600;text-align:right;border:1px solid var(--line);border-radius:7px;padding:4px 8px;width:110px' +
+                (rata ? ";background:var(--bg);color:var(--muted)" : "") + '">'
+             : '<span style="font-size:12px;color:var(--faint)">—</span>') + '</td>' +
+        '<td colspan="3"></td></tr>';
+    }).join('');
+
+    var kaki = '<tr style="background:#FBFCFB"><td></td><td></td>' +
+      '<td style="padding-left:26px"><span style="display:inline-flex;padding:3px;background:var(--hair);border-radius:9px">' +
+        '<button type="button" data-lunasmode="' + i + ':rata" style="border:none;background:' + (rata ? "#fff" : "none") + ';padding:6px 12px;border-radius:7px;font:inherit;font-size:11.5px;font-weight:' + (rata ? 700 : 600) + ';color:' + (rata ? "var(--ink)" : "var(--muted)") + ';cursor:pointer">Bagi rata</button>' +
+        '<button type="button" data-lunasmode="' + i + ':manual" style="border:none;background:' + (rata ? "none" : "#fff") + ';padding:6px 12px;border-radius:7px;font:inherit;font-size:11.5px;font-weight:' + (rata ? 600 : 700) + ';color:' + (rata ? "var(--muted)" : "var(--ink)") + ';cursor:pointer">Isi sendiri</button>' +
+      '</span></td>' +
+      '<td style="text-align:right;white-space:nowrap;font-size:11.5px;font-weight:700;color:' + (sisa === 0 ? "var(--grn)" : "var(--org)") + '">' +
+        (sisa === 0 ? 'Pas' : (sisa > 0 ? 'Sisa ' + UI.rp(sisa) : 'Lebih ' + UI.rp(-sisa))) + '</td>' +
+      '<td colspan="3">' + (sisa > 0
+        ? '<span style="display:flex;align-items:center;gap:8px;font-size:11.5px"><span style="color:var(--muted)">Sisanya catat sebagai</span>' +
+          '<select class="fld" data-lunassisa="' + i + '" aria-label="Kategori untuk sisa" style="padding:5px 7px;font-size:11.5px;min-width:186px' + (b.sisaKategoriId ? '' : ';border-color:var(--org-b);color:var(--org);font-weight:600') + '">' +
+          '<option value="">Pilih kategori…</option>' +
+          katSisa.map(function (k) { return '<option value="' + k.id + '"' + (b.sisaKategoriId === k.id ? ' selected' : '') + '>' + UI.esc(DB.namaKategori(k.id)) + '</option>'; }).join('') +
+          '</select></span>'
+        : '<span style="font-size:11.5px;color:var(--muted)">Seluruh nominal sudah menutup tagihan di atas.</span>') + '</td></tr>';
+
+    return baris + kaki;
   }
 
   function blokImport() {
@@ -204,13 +376,14 @@
           : '<select class="fld" data-jenis="' + i + '" aria-label="Jenis transaksi baris ' + (i + 1) + '" style="padding:5px 7px;font-size:11.5px;min-width:136px">' + opsiJenis(b.tipe) + '</select>') + '</td>' +
         '<td>' + (b.duplikat
           ? '<span>' + UI.esc(DB.namaKategori(b.kategoriId) || '—') + '</span>'
-          : (pecah ? '<span style="font-size:11.5px;color:var(--muted)">lihat bagian di bawah</span>' : selTujuan(String(i), b, b.sumberDanaId))) + '</td>' +
+          : (pecah ? '<span style="font-size:11.5px;color:var(--muted)">lihat bagian di bawah</span>' : selTujuan(String(i), b, b.sumberDanaId, b.nominal))) + '</td>' +
         '<td style="white-space:nowrap">' +
           (b.duplikat ? '<span class="pill n">Sudah ada</span>'
             : (masalahBaris(b) ? '<span class="pill o">' + UI.esc(masalahBaris(b)) + '</span>' : '<span class="pill g">Baru</span>')) +
-          (b.duplikat ? '' : ' <button type="button" class="btn" data-pecah="' + i + '" style="padding:4px 9px;font-size:11px;margin-left:6px">' + (pecah ? 'Gabung' : 'Pecah') + '</button>') +
+          (b.duplikat || isLunas(b) ? '' : ' <button type="button" class="btn" data-pecah="' + i + '" style="padding:4px 9px;font-size:11px;margin-left:6px">' + (pecah ? 'Gabung' : 'Pecah') + '</button>') +
         '</td></tr>';
 
+      if (isLunas(b) && !b.duplikat) return utama + barisLunas(b, i);
       if (!pecah) return utama;
 
       var sub = b.bagian.map(function (g, j) {
@@ -222,7 +395,7 @@
             '<input type="text" data-label="' + key + '" value="' + UI.esc(g.label || '') + '" placeholder="Bagian siapa? (opsional)" aria-label="Label bagian ' + (j + 1) + '" style="font:inherit;font-size:12px;border:1px solid var(--line);border-radius:7px;padding:4px 8px;width:180px"></span></td>' +
           '<td style="text-align:right;white-space:nowrap"><input type="text" inputmode="numeric" data-nom="' + key + '" value="' + (Number(g.nominal) || 0).toLocaleString('id-ID') + '" aria-label="Nominal bagian ' + (j + 1) + '" style="font:inherit;font-size:12px;font-weight:600;text-align:right;border:1px solid var(--line);border-radius:7px;padding:4px 8px;width:110px"></td>' +
           '<td><select class="fld" data-jenis="' + key + '" aria-label="Jenis bagian ' + (j + 1) + '" style="padding:5px 7px;font-size:11.5px;min-width:136px">' + opsiJenis(g.tipe) + '</select></td>' +
-          '<td>' + selTujuan(key, g, b.sumberDanaId) + '</td>' +
+          '<td>' + selTujuan(key, g, b.sumberDanaId, g.nominal) + '</td>' +
           '<td style="white-space:nowrap">' + (b.bagian.length > 2
             ? '<button type="button" class="btn danger" data-hapusbagian="' + key + '" style="padding:4px 9px;font-size:11px">Hapus</button>' : '') + '</td></tr>';
       }).join('');
@@ -330,10 +503,15 @@
       s.addEventListener('change', function () {
         var x = cari(s.getAttribute('data-jenis'));
         x.tipe = s.value;
-        if (x.tipe === 'transfer') x.kategoriId = '';
-        else { x.tujuanDanaId = ''; 
-               var sah = DB.state.Kategori.some(function (k) { return k.id === x.kategoriId && k.tipe === grupKategori(x.tipe); });
-               if (!sah) x.kategoriId = ''; }
+        if (x.tipe === 'transfer') { x.kategoriId = ''; x.lunasi = []; }
+        else if (isLunas(x)) {
+          x.kategoriId = ''; x.tujuanDanaId = '';
+          x.lunasi = x.lunasi || []; x.mode = x.mode || 'rata'; x.sisaKategoriId = x.sisaKategoriId || '';
+        } else {
+          x.tujuanDanaId = ''; x.lunasi = [];
+          var sah = DB.state.Kategori.some(function (k) { return k.id === x.kategoriId && k.tipe === grupKategori(x.tipe); });
+          if (!sah) x.kategoriId = '';
+        }
         render();
       });
     });
@@ -393,6 +571,45 @@
       });
     });
 
+    app.querySelectorAll('[data-lunaspilih]').forEach(function (c) {
+      c.addEventListener('change', function () {
+        var q = c.getAttribute('data-lunaspilih').split('~');
+        var b = impor.baris[Number(q[0])], id = q[1];
+        b.lunasi = b.lunasi || [];
+        if (c.checked) { if (!b.lunasi.some(function (l) { return l.id === id; })) b.lunasi.push({ id: id, nominal: 0 }); }
+        else b.lunasi = b.lunasi.filter(function (l) { return l.id !== id; });
+        if (b.mode !== 'manual') bagiRata(b, b.nominal);
+        render();
+      });
+    });
+    app.querySelectorAll('[data-lunasnom]').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        var q = inp.getAttribute('data-lunasnom').split('~');
+        var b = impor.baris[Number(q[0])], id = q[1];
+        var l = (b.lunasi || []).filter(function (x) { return x.id === id; })[0];
+        if (!l) return;
+        var maks = 0;
+        daftarLunas(b).forEach(function (r) { if (r.tx.id === id) maks = r.sisa; });
+        l.nominal = Math.min(maks, Number(String(inp.value).replace(/\D/g, '')) || 0);
+        render();
+      });
+    });
+    app.querySelectorAll('[data-lunasmode]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var q = btn.getAttribute('data-lunasmode').split(':');
+        var b = impor.baris[Number(q[0])];
+        b.mode = q[1];
+        if (b.mode === 'rata') bagiRata(b, b.nominal);
+        render();
+      });
+    });
+    app.querySelectorAll('[data-lunassisa]').forEach(function (s) {
+      s.addEventListener('change', function () {
+        impor.baris[Number(s.getAttribute('data-lunassisa'))].sisaKategoriId = s.value;
+        render();
+      });
+    });
+
     var batal = document.getElementById('fBatal');
     if (batal) batal.addEventListener('click', function () { impor = { file: null, sumberDanaId: impor.sumberDanaId, baris: [], info: null, perluPassword: false, pesan: '', memuat: false }; render(); });
 
@@ -409,20 +626,41 @@
         bagian.forEach(function (g, j) {
           if (!Number(g.nominal)) return;
           var ket = b.keterangan + (g.label ? ' · ' + g.label : (b.bagian ? ' · bagian ' + (j + 1) : ''));
+          var lunas = isLunas(g) ? (g.lunasi || []).filter(function (l) { return l.nominal; }) : [];
+          var pakai = lunas.reduce(function (a, l) { return a + l.nominal; }, 0);
+          var sisaUang = isLunas(g) ? Number(g.nominal) - pakai : 0;
+
           DB.tambahTransaksi({
             tanggal: b.tanggal,
             tipe: g.tipe,
-            kategoriId: g.tipe === 'transfer' ? '' : g.kategoriId,
+            kategoriId: (g.tipe === 'transfer' || isLunas(g)) ? '' : g.kategoriId,
             tujuanDanaId: g.tipe === 'transfer' ? g.tujuanDanaId : '',
-            nominal: Number(g.nominal),
+            nominal: isLunas(g) ? pakai : Number(g.nominal),
             sumberDanaId: b.sumberDanaId,
             catatan: ket,
             asal: 'pdf',
             grupId: grupId,
+            lunasi: lunas,
             hashInduk: b.hash,
             hash: DB.hashTx(b.tanggal, g.nominal, ket, b.bagian ? j + 1 : 0)
           });
           jumlah++;
+
+          if (sisaUang > 0 && g.sisaKategoriId) {
+            DB.tambahTransaksi({
+              tanggal: b.tanggal,
+              tipe: g.tipe === 'pelunasan' ? 'pemasukan' : 'pengeluaran',
+              kategoriId: g.sisaKategoriId,
+              nominal: sisaUang,
+              sumberDanaId: b.sumberDanaId,
+              catatan: ket + ' · sisa di luar pelunasan',
+              asal: 'pdf',
+              grupId: grupId || DB.uid('g'),
+              hashInduk: b.hash,
+              hash: DB.hashTx(b.tanggal, sisaUang, ket + 'SISA', 99)
+            });
+            jumlah++;
+          }
         });
       });
       impor = { file: null, sumberDanaId: impor.sumberDanaId, baris: [], info: null, perluPassword: false, pesan: '', memuat: false };

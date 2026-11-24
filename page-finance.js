@@ -29,6 +29,14 @@
         ? '<span class="pill n"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 6.1A9.9 9.9 0 0112 6c6.2 0 10 6 10 6a17 17 0 01-3.3 3.9M6.4 6.5A17 17 0 002 12s3.8 6.5 10 6.5a10 10 0 004.3-.9"></path></svg>' + sembunyi.length + ' sumber disembunyikan</span>'
         : '') +
       '<span style="font-size:12px;color:var(--muted);line-height:1.6">Sumber yang disembunyikan hilang sepenuhnya dari dashboard, total, dan ekspor. Atur di <a href="pengaturan.html">Profil &amp; Pengaturan</a>.</span>' +
+      (DB.totalPiutang() || DB.totalHutang()
+        ? '<div style="display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid var(--hair);padding-top:12px;margin-top:2px">' +
+          (DB.totalPiutang() ? '<span style="display:flex;align-items:center;gap:9px;font-size:12px">' + icon('ic-swap', 26) +
+            '<span>Piutang belum kembali<span style="display:block;font-weight:700;color:var(--blu)">' + UI.v(UI.rp(DB.totalPiutang()), 'num') + '</span></span></span>' : '') +
+          (DB.totalHutang() ? '<span style="display:flex;align-items:center;gap:9px;font-size:12px">' + icon('ic-bill', 26) +
+            '<span>Hutang belum dibayar<span style="display:block;font-weight:700;color:var(--org)">' + UI.v(UI.rp(DB.totalHutang()), 'num') + '</span></span></span>' : '') +
+          '</div>'
+        : '') +
     '</div>' +
     '<div style="flex:2 1 580px;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px">' +
       tampil.map(kartuSumber).join('') +

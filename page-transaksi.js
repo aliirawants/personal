@@ -73,7 +73,8 @@
             '<span style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">' + UI.esc(t.catatan || '—') +
             (t.asal === 'pdf' ? '<span class="pill b" style="font-size:10.5px;padding:2px 7px">Dari e-Statement</span>' : '') +
             (t.grupId ? '<span class="pill n" style="font-size:10.5px;padding:2px 7px">Split</span>' : '') +
-            (DB.isNetral(t) ? '<span class="pill b" style="font-size:10.5px;padding:2px 7px">' + UI.labelTipe(t.tipe) + '</span>' : '') + '</span></span>' +
+            (DB.isNetral(t) ? '<span class="pill b" style="font-size:10.5px;padding:2px 7px">' + UI.labelTipe(t.tipe) + '</span>' : '') +
+            (DB.uraiLunasi(t.lunasi).length ? '<span class="pill n" style="font-size:10.5px;padding:2px 7px">menutup ' + DB.uraiLunasi(t.lunasi).length + ' tagihan</span>' : '') + '</span></span>' +
             (s ? '<span class="pill n" style="white-space:nowrap">' + UI.esc(s.nama) + (t.tipe === 'transfer' && DB.sumber(t.tujuanDanaId) ? ' → ' + UI.esc(DB.sumber(t.tujuanDanaId).nama) : '') + '</span>' : '') +
             UI.v(UI.rpSigned(t.nominal, t.tipe), 'num', 'font-size:14px;font-weight:700;white-space:nowrap;min-width:118px;text-align:right;color:' + UI.warnaTipe(t.tipe)) +
             '<button type="button" class="btn danger" data-hapus="' + t.id + '" style="padding:6px 10px;font-size:12px">Hapus</button></div>';
